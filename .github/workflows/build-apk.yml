@@ -26,15 +26,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: الموافقة التلقائية على تراخيص Android SDK
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
       - name: تثبيت أدوات بناء أندرويد (Bubblewrap)
         run: npm install -g @bubblewrap/cli
 
-      - name: تهيئة مسارات الأداة تلقائياً
+      - name: تهيئة مسارات Bubblewrap
         run: |
           mkdir -p ~/.bubblewrap
           echo "{\"jdkPath\":\"${JAVA_HOME}\",\"androidSdkPath\":\"${ANDROID_HOME}\"}" > ~/.bubblewrap/config.json
 
-      - name: إنشاء ملف إعدادات أندرويد (twa-manifest.json)
+      - name: إنشاء ملف twa-manifest.json
         run: |
           cat << 'EOF' > twa-manifest.json
           {
@@ -73,7 +77,7 @@ jobs:
           BUBBLEWRAP_KEYSTORE_PASSWORD: android123
           BUBBLEWRAP_KEY_PASSWORD: android123
         run: |
-          bubblewrap build --skipPwaValidation
+          bubblewrap build --manifest=twa-manifest.json --skipPwaValidation
 
       - name: حفظ ورفع ملف التطبيق النهائي (APK & AAB)
         uses: actions/upload-artifact@v4
