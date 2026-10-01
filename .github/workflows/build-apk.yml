@@ -1,0 +1,46 @@
+name: Build Leotube APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: جلب ملفات المشروع
+        uses: actions/checkout@v4
+
+      - name: إعداد بيئة Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: إعداد بيئة Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: تثبيت أدوات بناء أندرويد (Bubblewrap)
+        run: npm install -g @bubblewrap/cli
+
+      - name: إنشاء مفتاح توقيع رقمي (Keystore)
+        run: |
+          keytool -genkey -v -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -validity 10000 -storepass "android123" -keypass "android123" -dname "CN=Leotube,O=Leotube,C=SA"
+
+      - name: تحويل المشروع إلى تطبيق أندرويد
+        run: |
+          echo -e "android123\nandroid123" | bubblewrap build
+
+      - name: حفظ ورفع ملف التطبيق النهائي (APK & AAB)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Leotube-Android-App
+          path: |
+            app-release-signed.apk
+            app-release-bundle.aab
