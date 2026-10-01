@@ -29,10 +29,40 @@ jobs:
       - name: تثبيت أدوات بناء أندرويد (Bubblewrap)
         run: npm install -g @bubblewrap/cli
 
-      - name: تهيئة مسارات Bubblewrap تلقائياً
+      - name: تهيئة مسارات الأداة تلقائياً
         run: |
           mkdir -p ~/.bubblewrap
           echo "{\"jdkPath\":\"${JAVA_HOME}\",\"androidSdkPath\":\"${ANDROID_HOME}\"}" > ~/.bubblewrap/config.json
+
+      - name: إنشاء ملف إعدادات أندرويد (twa-manifest.json)
+        run: |
+          cat << 'EOF' > twa-manifest.json
+          {
+            "packageId": "com.leotube.app",
+            "host": "khalidalbarqi20.github.io",
+            "name": "Leotube",
+            "launcherName": "Leotube",
+            "display": "standalone",
+            "themeColor": "#0b0c0f",
+            "navigationColor": "#0b0c0f",
+            "backgroundColor": "#0b0c0f",
+            "enableNotifications": false,
+            "startUrl": "/Leotube/",
+            "iconUrl": "https://khalidalbarqi20.github.io/Leotube/icon-512.png",
+            "maskableIconUrl": "https://khalidalbarqi20.github.io/Leotube/icon-maskable-512.png",
+            "splashScreenFadeOutDuration": 300,
+            "signingKey": {
+              "path": "./android.keystore",
+              "alias": "android"
+            },
+            "appVersionName": "1.0.0",
+            "appVersionCode": 1,
+            "generatorApp": "bubblewrap-cli",
+            "webManifestUrl": "https://khalidalbarqi20.github.io/Leotube/manifest.json",
+            "fallbackType": "customtabs",
+            "features": {}
+          }
+          EOF
 
       - name: إنشاء مفتاح توقيع رقمي (Keystore)
         run: |
@@ -47,6 +77,7 @@ jobs:
 
       - name: حفظ ورفع ملف التطبيق النهائي (APK & AAB)
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: Leotube-Android-App
           path: |
